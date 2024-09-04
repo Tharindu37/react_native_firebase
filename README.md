@@ -81,7 +81,9 @@ To learn more about React Native, take a look at the following resources:
 
 ### Create Project
 https://reactnative.dev/docs/getting-started-without-a-framework 
-
+```
+npx @react-native-community/cli@latest init AwesomeProject
+```
 ### Run
 ```
 adb devices

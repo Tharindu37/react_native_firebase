@@ -83,5 +83,11 @@ To learn more about React Native, take a look at the following resources:
 https://reactnative.dev/docs/getting-started-without-a-framework 
 
 ### Run
+```
 adb devices
 npm run android
+```
+### Setup Firebase
+```
+npm install --save @react-native-firebase/app
+```

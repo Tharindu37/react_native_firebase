@@ -88,6 +88,7 @@ adb devices
 npm run android
 ```
 ### Setup Firebase
+https://rnfirebase.io/
 ```
 npm install --save @react-native-firebase/app
 ```

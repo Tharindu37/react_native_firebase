@@ -5,114 +5,115 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import database from '@react-native-firebase/database';
+import React, { useEffect, useState } from 'react';
+import { Button, Text, TextInput, View } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+function App(): React.JSX.Element {
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const addUser = async (userId, name, email) =>{
+    try{
+      await database().ref(`/users/${userId}`).set({name:name, email:email});
+      console.log('User added successfully.')
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  const getUser = async (userId) => {
+    try {
+      const snapshot = await 
+        database()
+        .ref(`/users/${userId}`)
+        .once('value');
+      console.log('User data: ', snapshot.val());
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  const subscribeToUser = (userId) => {
+   database()
+      .ref(`/users/${userId}`)
+      .on('value', (snapshot) => {
+        console.log('User data: ', snapshot.val());
+      });
+  };
+  
+  // Don't forget to unsubscribe when you no longer need the data
+  const unsubscribe = () => {
+    database().ref(`/users/${userId}`).off('value');
+  };
+  
+  const updateUser = async (userId, name) => {
+    try {
+      await 
+        database()
+        .ref(`/users/${userId}`)
+        .update({
+          name: name,
+        });
+      console.log('User updated successfully');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  const deleteUser = async (userId) => {
+    try {
+      await database().ref(`/users/${userId}`).remove();
+      console.log('User deleted successfully');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [userId, setUserId] = useState('1'); // Example user ID
+
+  useEffect(() => {
+    // Fetch user data when the component mounts
+    getUser(userId);
+
+    // Subscribe to real-time updates
+    subscribeToUser(userId);
+
+    // Clean up the subscription on component unmount
+    return () => unsubscribe();
+  }, []);
+
+  const handleAddUser = () => {
+    addUser(userId, name, email);
+  };
+
+  const handleUpdateUser = () => {
+    updateUser(userId, name);
+  };
+
+  const handleDeleteUser = () => {
+    deleteUser(userId);
+  };
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View>
+      <TextInput
+        placeholder="Name"
+        value={name}
+        onChangeText={(text) => setName(text)}
+      />
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
+      <Button title="Add User" onPress={handleAddUser} />
+      <Button title="Update User" onPress={handleUpdateUser} />
+      <Button title="Delete User" onPress={handleDeleteUser} />
     </View>
   );
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
